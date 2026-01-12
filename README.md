@@ -71,10 +71,10 @@ The pipeline will:
 ## Project Structure
 
 ```
-├── agents/                          # Agent implementation
-│   ├── strands_agent.py            # Main agent code (Claude + calculator tool)
-│   └── requirements.txt            # Python dependencies
-├── scripts/                        # Deployment automation
+├── agents/                        # Agent implementation
+│   ├── strands_agent.py           # Main agent code (Claude + calculator tool)
+│   └── requirements.txt           # Python dependencies
+├── scripts/                       # Deployment automation
 │   ├── setup_oidc.py              # AWS OIDC configuration
 │   ├── create_iam_role.py         # IAM role creation
 │   ├── create_guardrail.py        # Bedrock guardrail setup
@@ -84,7 +84,7 @@ The pipeline will:
 ├── .github/workflows/
 │   ├── deploy-agentcore.yml       # Main CI/CD pipeline
 │   └── test-agent.yml             # Manual testing workflow
-├── Dockerfile                      # Optimized container with security features
+├── Dockerfile                     # Optimized container with security features
 └── README.md                      # This file
 ```
 
@@ -156,7 +156,7 @@ python scripts/cleanup_ecr.py \
 ## Pipeline Architecture
 
 ### Workflows
-1. **deploy-agentcore.yml**: Main CI/CD pipeline (triggered on push to main)
+1. **deploy-agentcore.yml**: Main CI/CD pipeline (workflow_dispatch). This behaviour can be altered based on your usecase (push, pull-request etc.)
 2. **test-agent.yml**: Manual testing workflow (workflow_dispatch)
 
 ### Pipeline Stages
