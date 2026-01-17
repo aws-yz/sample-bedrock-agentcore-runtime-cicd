@@ -60,7 +60,8 @@ def create_oidc_provider(iam_client):
         # Check if GitHub OIDC provider already exists
         providers = iam_client.list_open_id_connect_providers()
         for provider in providers["OpenIDConnectProviderList"]:
-            if github_url in provider["Arn"]:
+            # ARN format: arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com
+            if "token.actions.githubusercontent.com" in provider["Arn"]:
                 logger.info(f"GitHub OIDC provider already exists: {provider['Arn']}")
                 return provider["Arn"]
         
@@ -75,6 +76,14 @@ def create_oidc_provider(iam_client):
         return response["OpenIDConnectProviderArn"]
         
     except ClientError as e:
+        # Handle case where provider was created between check and create
+        if e.response["Error"]["Code"] == "EntityAlreadyExists":
+            logger.info("OIDC provider already exists, retrieving ARN...")
+            providers = iam_client.list_open_id_connect_providers()
+            for provider in providers["OpenIDConnectProviderList"]:
+                if "token.actions.githubusercontent.com" in provider["Arn"]:
+                    logger.info(f"Found existing provider: {provider['Arn']}")
+                    return provider["Arn"]
         logger.error(f"Error creating OIDC provider: {e}")
         exit(1)
 
@@ -134,6 +143,10 @@ def create_github_role(iam_client, provider_arn, github_repo):
                     "bedrock:InvokeModelWithResponseStream", # Stream model responses
                     "bedrock:GetFoundationModel",       # Get model information
                     "bedrock:ListFoundationModels",     # List available models
+                    "bedrock:CreateGuardrail",          # Create guardrails
+                    "bedrock:GetGuardrail",             # Get guardrail details
+                    "bedrock:ListGuardrails",           # List guardrails
+                    "bedrock:CreateGuardrailVersion",   # Create guardrail versions
                     "bedrock-agentcore:*",              # AgentCore runtime operations
                     "bedrock-agentcore-control:*",      # AgentCore control plane operations
                     
